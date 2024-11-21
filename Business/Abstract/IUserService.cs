@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Entities;
+using Entities.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +10,9 @@ namespace Business.Abstract
 {
     public interface IUserService
     {
+        public List<User> GetAllUser();
+        Task<string> RegisterAsync(RegisterModel model);
+        Task<AuthenticationModel> GetTokenAsync(TokenRequestModel model);
+        Task<string> AddRoleAsync(AddRoleModel model);
     }
 }

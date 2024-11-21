@@ -11,14 +11,12 @@ namespace DataAccess.Concrete
 {
     public class UserRepository : IUserRepository
     {
-        /*
-        public List<Hotel> GetAllHotels()
+        public List<User> GetAllUsers()
         {
             using (var _DBContext = new DBContext())
             {
-                return _DBContext.Hotels.Where(x => x.MyProperty == 1).ToList();
+                return _DBContext.Users.ToList();
             }
         }
-        */
     }
 }

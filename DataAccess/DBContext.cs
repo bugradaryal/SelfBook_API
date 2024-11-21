@@ -31,7 +31,8 @@ namespace DataAccess
         {
             base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<User>()
+            modelBuilder.Entity<User>().Property(x => x.FirstName).HasColumnType("nvarchar(120)").IsRequired();
+            modelBuilder.Entity<User>().Property(x => x.LastName).HasColumnType("nvarchar(120)").IsRequired();
 
             modelBuilder.Entity<UserLibary>().HasKey(x => x.id);
             modelBuilder.Entity<UserLibary>().Property(x => x.id).UseIdentityColumn();
@@ -50,19 +51,8 @@ namespace DataAccess
             modelBuilder.Entity<Category>().Property(x => x.id).UseIdentityColumn();
 
             modelBuilder.Entity<Category>().Property(x => x.category).HasColumnType("varchar(80)").IsRequired().HasMaxLength(80);
-            modelBuilder.Entity<Category>().HasData(
-                new Category { id = 1, category = "Health & Fitness" },
-                new Category { id = 2, category = "Biographies" },
-                new Category { id = 3, category = "Business" },
-                new Category { id = 4, category = "Comics" },
-                new Category { id = 5, category = "Cooking" },
-                new Category { id = 6, category = "Education" },
-                new Category { id = 7, category = "History" },
-                new Category { id = 8, category = "Home & Garden & Crafts" },
-                new Category { id = 9, category = "Romance" },
-                new Category { id = 10, category = "Sci-Fi & Fantasy" },
-                new Category { id = 11, category = "Sports & Travel" }
-                );
+
+            modelBuilder.ApplyConfiguration(new SeedData.InsertCategories());
 
             //////////////////////////////////////////////
 
