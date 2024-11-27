@@ -32,6 +32,8 @@ namespace DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(120)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(120)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -179,7 +181,7 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     name = table.Column<string>(type: "varchar(160)", nullable: false),
                     author = table.Column<string>(type: "varchar(160)", nullable: false, defaultValue: "Anonymous or not definded!!"),
-                    release_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 8)),
+                    release_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 24)),
                     category_id = table.Column<int>(type: "int", nullable: false),
                     page = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     image = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
@@ -224,7 +226,7 @@ namespace DataAccess.Migrations
                     user_id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     book_id = table.Column<int>(type: "int", nullable: false),
                     current_page = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    add_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 8))
+                    add_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 24))
                 },
                 constraints: table =>
                 {
@@ -241,6 +243,16 @@ namespace DataAccess.Migrations
                         principalTable: "Books",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "70cdefa4-fcec-40ae-ae48-a6ca3e849ec4", null, "User", "USER" },
+                    { "85a8aea6-c11d-40b5-9e19-84c0750d5209", null, "Administrator", "ADMİNİSTRATOR" },
+                    { "e760e7b7-f161-4cc1-bf1f-5dff35e53af9", null, "Moderator", "MODERATOR" }
                 });
 
             migrationBuilder.InsertData(

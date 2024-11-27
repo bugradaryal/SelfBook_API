@@ -1,5 +1,8 @@
 ﻿using Entities;
+using Entities.DTOs;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,28 +11,15 @@ using System.Threading.Tasks;
 
 namespace DataAccess.SeedData
 {
-    public class InsertIdentity 
+    public class InsertIdentity : IEntityTypeConfiguration<IdentityRole>
     {
-        public static async Task SeedEssentialAsync(UserManager<User> userManager,
-            RoleManager<IdentityRole> roleManager)
+        public void Configure(EntityTypeBuilder<IdentityRole> entity)
         {
-            //Seed roles
-            await roleManager.CreateAsync(new IdentityRole(Entities.DTOs.Authorization.Roles.Administrator.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Entities.DTOs.Authorization.Roles.Moderator.ToString()));
-            await roleManager.CreateAsync(new IdentityRole(Entities.DTOs.Authorization.Roles.User.ToString()));
-            //Seed Default User
-            var defaultUser = new User
-            {
-                UserName = Entities.DTOs.Authorization.default_username,
-                Email = Entities.DTOs.Authorization.default_email,
-                EmailConfirmed = true,
-                PhoneNumberConfirmed = true,
-            };
-            if (userManager.Users.All(u => u.Id != defaultUser.Id))
-            {
-                await userManager.CreateAsync(defaultUser, Entities.DTOs.Authorization.default_password);
-                await userManager.AddToRoleAsync(defaultUser, Entities.DTOs.Authorization.default_role.ToString());
-            }
+            entity.HasData(
+                new IdentityRole { Name = Authorization.Roles.Administrator.ToString(), NormalizedName = Authorization.Roles.Administrator.ToString().ToUpper() },
+                new IdentityRole { Name = Authorization.Roles.Moderator.ToString(), NormalizedName = Authorization.Roles.Moderator.ToString().ToUpper() },
+                new IdentityRole { Name = Authorization.Roles.User.ToString(), NormalizedName = Authorization.Roles.User.ToString().ToUpper() }
+            );
         }
     }
 }

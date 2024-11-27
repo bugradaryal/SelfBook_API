@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(DBContext))]
-    [Migration("20241108164618_InitialCreate")]
+    [Migration("20241124173231_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace DataAccess.Migrations
                     b.Property<DateOnly>("release_date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasDefaultValue(new DateOnly(2024, 11, 8));
+                        .HasDefaultValue(new DateOnly(2024, 11, 24));
 
                     b.HasKey("id");
 
@@ -185,6 +185,14 @@ namespace DataAccess.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -242,7 +250,7 @@ namespace DataAccess.Migrations
                     b.Property<DateOnly>("add_date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasDefaultValue(new DateOnly(2024, 11, 8));
+                        .HasDefaultValue(new DateOnly(2024, 11, 24));
 
                     b.Property<int>("book_id")
                         .HasColumnType("int");
@@ -291,6 +299,26 @@ namespace DataAccess.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "85a8aea6-c11d-40b5-9e19-84c0750d5209",
+                            Name = "Administrator",
+                            NormalizedName = "ADMİNİSTRATOR"
+                        },
+                        new
+                        {
+                            Id = "e760e7b7-f161-4cc1-bf1f-5dff35e53af9",
+                            Name = "Moderator",
+                            NormalizedName = "MODERATOR"
+                        },
+                        new
+                        {
+                            Id = "70cdefa4-fcec-40ae-ae48-a6ca3e849ec4",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

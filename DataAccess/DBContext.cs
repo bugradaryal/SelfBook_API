@@ -1,4 +1,5 @@
 ﻿using System;
+using DataAccess.SeedData;
 using Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -52,8 +53,6 @@ namespace DataAccess
 
             modelBuilder.Entity<Category>().Property(x => x.category).HasColumnType("varchar(80)").IsRequired().HasMaxLength(80);
 
-            modelBuilder.ApplyConfiguration(new SeedData.InsertCategories());
-
             //////////////////////////////////////////////
 
             modelBuilder.Entity<Book_Pdf>().HasKey(x => x.id);
@@ -87,10 +86,11 @@ namespace DataAccess
 
             modelBuilder.Entity<Category>().HasOne(x => x.book).WithOne(x => x.b_category).HasForeignKey<Book>(x => x.category_id); 
 
-            modelBuilder.Entity<Book>().HasOne(x => x.book_pdf).WithOne(x => x.book).HasForeignKey<Book_Pdf>(x => x.book_id);       
+            modelBuilder.Entity<Book>().HasOne(x => x.book_pdf).WithOne(x => x.book).HasForeignKey<Book_Pdf>(x => x.book_id);
 
 
-
+            modelBuilder.ApplyConfiguration(new SeedData.InsertCategories());
+            modelBuilder.ApplyConfiguration(new SeedData.InsertIdentity());
 
         }
     }

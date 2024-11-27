@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,23 +22,19 @@ namespace Business.Concrete
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly Entities.DTOs.JWT _jwt;
-
+        private readonly SignInManager<User> _signInManager;
 
         private IUserRepository _userRepository;
-        public UserManager(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JWT> jwt)
+        public UserManager(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IOptions<JWT> jwt, SignInManager<User> signInManager)
         {
             _userRepository = new UserRepository();
             _userManager = userManager;
             _roleManager = roleManager;
             _jwt = jwt.Value;
+            _signInManager = signInManager;
         }
 
-        public List<User> GetAllUser()
-        {
-            return _userRepository.GetAllUsers();
-        }
-
-        public async Task<string> RegisterAsync(RegisterModel model)
+        public async Task<string> RegisterAsync(RegisterModel model)        //response message alamıyoz düzelcek
         {
             var user = new User
             {
@@ -46,20 +43,36 @@ namespace Business.Concrete
                 FirstName = model.FirstName,
                 LastName = model.LastName,
             };
-            var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email);
-            var userWithSameUserName = await _userManager.FindByNameAsync(model.UserName);
-            if (userWithSameEmail == null && userWithSameUserName == null)
+            var ıdentityResult = await _userManager.CreateAsync(user, model.Password);
+            if (ıdentityResult.Succeeded)
             {
-                var result = await _userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, Authorization.default_role.ToString());
-                }
+                _userManager.AddToRoleAsync(user, Authorization.default_role.ToString());
                 return $"User Registered {user.UserName}";
             }
             else
-                return $"Email or Username is already registered.";
+                return $"Email or Username is already exist.";
         }
+        
+        public async Task<User> GetUserByEmail (string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return user;
+        }
+
+        public async Task<SignInResult> LoginAsync(User user, string password)
+        {
+            var result = await _signInManager.CheckPasswordSignInAsync(user, password, true);
+            return result;
+        }
+
+
+
+
+
+
+
+
+
         public async Task<string> AddRoleAsync(AddRoleModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -84,72 +97,5 @@ namespace Business.Concrete
             }
             return $"Incorrect Credentials for user {user.Email}.";
         }
-
-        public async Task<AuthenticationModel> GetTokenAsync(TokenRequestModel model)
-        {
-            AuthenticationModel authenticationModel;
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-                return new AuthenticationModel { IsAuthenticated = false, Message = $"No Accounts Registered with {model.Email}." };
-
-            if (await _userManager.CheckPasswordAsync(user, model.Password))
-            {
-                JwtSecurityToken jwtSecurityToken = await CreateJwtToken(user);
-
-                authenticationModel = new AuthenticationModel
-                {
-                    IsAuthenticated = true,
-                    Message = jwtSecurityToken.ToString(),
-                    UserName = user.UserName,
-                    Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
-                    Email = user.Email,
-                };
-                var rolesList = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-                authenticationModel.Roles = rolesList.ToList();
-                return authenticationModel;
-            }
-            else
-            {
-                authenticationModel = new AuthenticationModel()
-                {
-                    IsAuthenticated = false,
-                    Message = $"Incorrect Credentials for user {user.Email}."
-                };
-            }
-            return authenticationModel;
-        }
-
-        private async Task<JwtSecurityToken> CreateJwtToken(User user)
-        {
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var roleClaims = new List<Claim>();
-            for (int i = 0; i < roles.Count; i++)
-            {
-                roleClaims.Add(new Claim("roles", roles[i]));
-            }
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id)
-            }
-            .Union(userClaims)
-            .Union(roleClaims);
-            var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
-            var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _jwt.Issuer,
-                audience: _jwt.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
-                signingCredentials: signingCredentials);
-            return jwtSecurityToken;
-        }
-
-
-
-
     }
 }
