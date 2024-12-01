@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,7 +32,7 @@ namespace Business.Concrete
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("uid", user.Id)
             };
-            var signingCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
+            var signingCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
 
             var tokenDescrtiptor = new SecurityTokenDescriptor
             {

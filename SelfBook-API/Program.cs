@@ -12,13 +12,14 @@ using DataAccess.Concrete;
 using Business.Abstract;
 using Business.Concrete;
 using Microsoft.OpenApi.Models;
-
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -75,6 +76,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 
 builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+builder.Services.Configure<EmailSender>(builder.Configuration.GetSection("EmailSender"));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -103,6 +105,20 @@ builder.Services.AddScoped<ITokenServices, TokenManager>();
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddControllers()
+        .AddNewtonsoftJson(options => {
+            // CamelCase düzeni kullanarak JSON anahtarlarýný küçük harflerle baþlatmak
+            options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+            // JSON çýktýsýný okunabilir hale getirmek için
+            options.SerializerSettings.Formatting = Formatting.Indented;
+
+            // Hata durumlarý için daha fazla ayrýntý vermek üzere
+            options.SerializerSettings.Error = (sender, args) =>
+            {
+                args.ErrorContext.Handled = true; // Hatalý JSON'u görmezden gelmek
+            };
+        });
 
 var app = builder.Build();
 
@@ -110,10 +126,12 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseRouting();  // Routing önce olmalý
 
-app.UseRouting();
+app.UseAuthentication();  // Authentication middleware'inin önce gelmesi lazým
+app.UseAuthorization();   // Authorization middleware'ini sonra kullanmalýsýnýz
+
+
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
