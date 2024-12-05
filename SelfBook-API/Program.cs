@@ -70,8 +70,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedEmail = false; //deðiþçek
-}).AddEntityFrameworkStores<DBContext>();
+    options.SignIn.RequireConfirmedEmail = true;
+}).AddEntityFrameworkStores<DBContext>().AddDefaultTokenProviders();
 
 
 
@@ -85,8 +85,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(o =>
    {
-      o.RequireHttpsMetadata = false;
-           o.SaveToken = false;
+        o.SaveToken = false;
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,

@@ -13,8 +13,10 @@ namespace Business.Abstract
     public interface IUserService
     {
         Task<string> RegisterAsync(RegisterModel model);
-        Task<string> AddRoleAsync(AddRoleModel model);
         Task<User> GetUserByEmail(string email);
         Task<SignInResult> LoginAsync(User user, string password);
+        Task DeleteUser(string userid, string password);
+        Task UpdateUser(User user);
+        Task<IdentityResult> ChangePassword(User user, string oldPassword, string newPassword);
     }
 }

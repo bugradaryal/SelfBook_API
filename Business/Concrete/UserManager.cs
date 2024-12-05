@@ -43,59 +43,45 @@ namespace Business.Concrete
                 FirstName = model.FirstName,
                 LastName = model.LastName,
             };
-            var ıdentityResult = await _userManager.CreateAsync(user, model.Password);
-            if (ıdentityResult.Succeeded)
+            var identityResult = await _userManager.CreateAsync(user, model.Password);
+            if (identityResult.Succeeded)
             {
-                _userManager.AddToRoleAsync(user, Authorization.default_role.ToString());
+                await _userManager.AddToRoleAsync(user, Authorization.default_role.ToString());
                 return $"User Registered {user.UserName}";
             }
             else
-                return $"Email or Username is already exist.";
-        }
-        
-        public async Task<User> GetUserByEmail (string email)
+                return string.Join(", ", identityResult.Errors.Select(e => e.Description));
+        }      
+        public async Task<User> GetUserByEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             return user;
         }
-
         public async Task<SignInResult> LoginAsync(User user, string password)
         {
             var result = await _signInManager.CheckPasswordSignInAsync(user, password, true);
             return result;
         }
-
-
-
-
-
-
-
-
-
-        public async Task<string> AddRoleAsync(AddRoleModel model)
+        public async Task DeleteUser(string userid, string password)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+            var user = await _userManager.FindByIdAsync(userid);
+            if(user == null)
+                throw new Exception("User not found!!");
+            await _userManager.DeleteAsync(user);
+        }
+        public async Task UpdateUser(User user)
+        {
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
             {
-                return $"No Accounts Registered with {model.Email}.";
+                var errorMessages = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception("Cant update user!!    -    " + errorMessages);
             }
-            if (await _userManager.CheckPasswordAsync(user, model.Password))
-            {
-                var roleExists = Enum.GetNames(typeof(Authorization.Roles))
-                    .Any(x => x.ToLower() == model.Role.ToLower());
-                if (roleExists)
-                {
-                    var validRole = Enum.GetValues(typeof(Authorization.Roles)).Cast<Authorization.Roles>()
-                        .Where(x => x.ToString().ToLower() == model.Role.ToLower())
-                        .FirstOrDefault();
-
-                    await _userManager.AddToRoleAsync(user, validRole.ToString());
-                    return $"Added {model.Role} to user {model.Email}.";
-                }
-                return $"Role {model.Role} not found.";
-            }
-            return $"Incorrect Credentials for user {user.Email}.";
+        }
+        public async Task<IdentityResult> ChangePassword(User user, string oldPassword, string newPassword)
+        {
+            var result = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            return result;
         }
     }
 }

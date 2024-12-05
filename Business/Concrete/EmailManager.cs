@@ -18,28 +18,24 @@ namespace Business.Concrete
     public class EmailManager : IEmailService
     {
         private readonly Entities.DTOs.EmailSender _emailsender;
-
-        public EmailManager(IOptions<EmailSender> emailSender)
+        private readonly UserManager<User> _userManager;
+        public EmailManager(IOptions<EmailSender> emailSender, UserManager<User> userManager)
         {
+            _userManager = userManager;
             _emailsender = emailSender.Value; 
         }
 
 
-        public void SendingEmail(string email)
+        public async Task SendingEmail(string email, string url)    //callback url required
         {
-
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress("Email Verification<No-Reply>", _emailsender.Email));
             message.To.Add(new MailboxAddress("", email));
             message.Subject = "Email Verification by SelfBookAPI";
 
-
-            Random rnd = new Random();
-            string number = rnd.Next(0, 9999).ToString();
-            number = String.Format("{0:0000}", number);
-
             var bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = "<b>Email code: </b>" + number;
+            bodyBuilder.HtmlBody = "<b>Email verification url: </b>" + "<a href = " + url + "> link text </a> <br>" +
+                "<br> <p>If link doesn't work : " + url + "</p>";
 
             message.Body = bodyBuilder.ToMessageBody();
 
@@ -53,6 +49,22 @@ namespace Business.Concrete
                 client.Disconnect(true);
             }
         }
+        public async Task ConfirmEmail(string userid, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userid);
+            if (user == null)
+                throw new Exception("User not found!!");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+                throw new Exception("Email confirmation failed!");
+        }
+
+
+
+
+
+
 
     }
 }
