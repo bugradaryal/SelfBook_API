@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Entities;
 using Business.Abstract;
 using Business.Concrete;
-using Entities.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -16,6 +15,8 @@ using System.Text.Json.Nodes;
 using static System.Net.Mime.MediaTypeNames;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Entities.ViewModels.UserModels;
+using Entities.ViewModels.ConfigurationModels;
 
 namespace SelfBook.Controllers
 {
@@ -39,7 +40,7 @@ namespace SelfBook.Controllers
 
         [HttpPost("RegisterUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterUser([FromBody] RegisterModel registerModel)   
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterUserModel registerModel)   
         {
             try
             {
@@ -50,12 +51,12 @@ namespace SelfBook.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new {message = ex.Message});
             }
         }
         [HttpPost("LoginUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginUser([FromBody] LoginModel loginModel)        
+        public async Task<IActionResult> LoginUser([FromBody] LoginUserModel loginModel)        
         {
             try
             {  
@@ -73,7 +74,11 @@ namespace SelfBook.Controllers
                     return Unauthorized(new { message = "Too many attempt. Account is locked for 5 min!" });
                 else if (response.Succeeded)
                 {
+                    var refleshToken = _tokenServices.GenerateRefreshToken();
+                    await _tokenServices.SaveRefreshTokenAsync(user, refleshToken);
+
                     Response.Headers.Append("Authorization", "Bearer " + _tokenServices.CreateTokenJWT(user));
+                    Response.Headers.Append("Refresh-Token", refleshToken);
                     return Ok(new { message = "Login Succesfull" });
                 }
                 else
@@ -81,7 +86,7 @@ namespace SelfBook.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
         }
         [HttpPost("SendMail")]
@@ -103,7 +108,7 @@ namespace SelfBook.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
         }
         [HttpGet("Emailverification")]
@@ -113,12 +118,12 @@ namespace SelfBook.Controllers
             try
             {
                 await _emailService.ConfirmEmail(userId, emailConfUrl);
+                return Ok(new { message = "Your email has been successfully confirmed!" });
             }
             catch(Exception ex) 
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
-            return Ok(new { message = "Your email has been successfully confirmed!" });
         }
         [HttpPost("DeleteUser")]
         [Authorize]
@@ -130,33 +135,36 @@ namespace SelfBook.Controllers
                 if (response.errorMessage != null)
                     return BadRequest(new { message = response.errorMessage });
                 await _userService.DeleteUser(response.user.Id, password);
+                return Ok(new { message = "Your email has been successfully confirmed!" });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
-            return Ok(new { message = "Your email has been successfully confirmed!"});
         }
         [HttpPut("UpdateUser")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(UpdateUser updateUser)
+        public async Task<IActionResult> UpdateUser(UpdateUserModel updateUser)
         {
             try
             {
                 var response = await _tokenServices.ValidateToken(HttpContext);
                 if (response.errorMessage != null) 
                     return BadRequest(new { message = response.errorMessage });
-                if(updateUser.firstName != string.Empty)
+                if(!string.IsNullOrEmpty(updateUser.firstName))
                     response.user.FirstName = updateUser.firstName;
 
-                if (updateUser.lastName != string.Empty)
+                if (!string.IsNullOrEmpty(updateUser.lastName))
                     response.user.LastName = updateUser.lastName;
 
-                if (updateUser.UserName != string.Empty)
+                if (!string.IsNullOrEmpty(updateUser.UserName))
                     response.user.UserName = updateUser.UserName;
 
-                if (updateUser.phoneNumber != string.Empty)
+                if (!string.IsNullOrEmpty(updateUser.phoneNumber))
                     response.user.PhoneNumber = updateUser.phoneNumber;
+
+                if (!string.IsNullOrEmpty(updateUser.Gender))
+                    response.user.Gender = updateUser.Gender;
 
                 await _userService.UpdateUser(response.user);
                 Response.Headers.Append("Authorization", "Bearer " + _tokenServices.CreateTokenJWT(response.user));
@@ -165,7 +173,7 @@ namespace SelfBook.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
 
         }   
@@ -188,9 +196,35 @@ namespace SelfBook.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new { message = ex.Message });
             }
 
         }
+
+        [HttpPost("RefreshToken")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RefreshToken()
+        {
+            try
+            {
+                var refleshToken = Request.Headers["Authorization"].FirstOrDefault();
+                if (refleshToken == null)
+                    return BadRequest(new { message = "RefreshToken not found." });
+                var user = await _tokenServices.GetUserFromRefreshToken(refleshToken);
+                if (user == null)
+                    return BadRequest(new { message = "User not found." });
+                var newRefreshToken = _tokenServices.GenerateRefreshToken();
+                await _tokenServices.SaveRefreshTokenAsync(user, newRefreshToken);
+                Response.Headers.Append("Authorization", "Bearer " + _tokenServices.CreateTokenJWT(user));
+                Response.Headers.Append("Refresh-Token", newRefreshToken);
+
+                return Ok(new { message = "Login Succesfull With RefreshToken" });
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }

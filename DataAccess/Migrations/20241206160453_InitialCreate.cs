@@ -34,6 +34,7 @@ namespace DataAccess.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(120)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(120)", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(15)", nullable: false, defaultValue: "Undefined"),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -181,10 +182,11 @@ namespace DataAccess.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     name = table.Column<string>(type: "varchar(160)", nullable: false),
                     author = table.Column<string>(type: "varchar(160)", nullable: false, defaultValue: "Anonymous or not definded!!"),
-                    release_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 24)),
+                    release_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 12, 6)),
                     category_id = table.Column<int>(type: "int", nullable: false),
                     page = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    image = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                    image = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    pdf = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -198,26 +200,6 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Book_Pdfs",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    book_id = table.Column<int>(type: "int", nullable: false),
-                    pdf = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Book_Pdfs", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_Book_Pdfs_Books_book_id",
-                        column: x => x.book_id,
-                        principalTable: "Books",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserLibaries",
                 columns: table => new
                 {
@@ -226,7 +208,7 @@ namespace DataAccess.Migrations
                     user_id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     book_id = table.Column<int>(type: "int", nullable: false),
                     current_page = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
-                    add_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 11, 24))
+                    add_date = table.Column<DateOnly>(type: "date", nullable: false, defaultValue: new DateOnly(2024, 12, 6))
                 },
                 constraints: table =>
                 {
@@ -250,9 +232,9 @@ namespace DataAccess.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "70cdefa4-fcec-40ae-ae48-a6ca3e849ec4", null, "User", "USER" },
-                    { "85a8aea6-c11d-40b5-9e19-84c0750d5209", null, "Administrator", "ADMİNİSTRATOR" },
-                    { "e760e7b7-f161-4cc1-bf1f-5dff35e53af9", null, "Moderator", "MODERATOR" }
+                    { "26ac2e91-3818-4466-bebc-503c898e7d22", null, "Moderator", "MODERATOR" },
+                    { "89b628c0-a356-4f48-8acd-cf70f2511a1c", null, "User", "USER" },
+                    { "8c1ef97d-ad67-408c-8fb0-404fd632aeb9", null, "Administrator", "ADMİNİSTRATOR" }
                 });
 
             migrationBuilder.InsertData(
@@ -313,12 +295,6 @@ namespace DataAccess.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Book_Pdfs_book_id",
-                table: "Book_Pdfs",
-                column: "book_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Books_category_id",
                 table: "Books",
                 column: "category_id",
@@ -327,8 +303,7 @@ namespace DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserLibaries_book_id",
                 table: "UserLibaries",
-                column: "book_id",
-                unique: true);
+                column: "book_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserLibaries_user_id",
@@ -353,9 +328,6 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
-
-            migrationBuilder.DropTable(
-                name: "Book_Pdfs");
 
             migrationBuilder.DropTable(
                 name: "UserLibaries");

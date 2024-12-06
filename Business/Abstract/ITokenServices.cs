@@ -1,5 +1,5 @@
 ﻿using Entities;
-using Entities.DTOs;
+using Entities.ViewModels.TokenModels;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -15,5 +15,8 @@ namespace Business.Abstract
         string CreateTokenJWT(User user);
         Task<string> CreateTokenEmailConfirm(User user);
         Task<TokenValidation> ValidateToken(HttpContext context);
+        string GenerateRefreshToken();
+        Task SaveRefreshTokenAsync(User user, string refleshToken);
+        Task<User> GetUserFromRefreshToken(string refreshToken);
     }
 }

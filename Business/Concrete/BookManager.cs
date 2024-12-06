@@ -20,7 +20,6 @@ namespace Business.Concrete
             _bookRepository = new BookRepository();
         }
 
-
         public async Task AddBook(Book book)
         {
             await _bookRepository.AddBook(book);
@@ -33,16 +32,14 @@ namespace Business.Concrete
         {
             await _bookRepository.UpdateBook(book);
         }
-        public Book GetBook(int bookId)
+        public async Task<Book> GetBook(int bookId)
         {
-            var book = _bookRepository.GetBook(bookId);
+            var book = await _bookRepository.GetBook(bookId);
             return book;
         }
-        public List<Book> GetAllBook(int page, string orderBy)
+        public async Task<List<Book>> GetAllBook(int page, string orderBy)
         {
-            if (orderBy != "name" || orderBy != "author" || orderBy != "release_date" || orderBy != "page")
-                throw new Exception("Wrong order type!!");
-            var books = _bookRepository.GetAllBook(page, orderBy);
+            var books = await _bookRepository.GetAllBook(page, orderBy);
             return books;
         }
     }

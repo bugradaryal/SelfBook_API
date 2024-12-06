@@ -7,6 +7,7 @@ namespace Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public string Gender { get; set; }
         public ICollection<UserLibary> userlibary { get; set; }
     }
 }

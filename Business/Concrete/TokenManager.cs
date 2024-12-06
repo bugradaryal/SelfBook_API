@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities;
-using Entities.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -17,19 +16,26 @@ using System.Threading.Tasks;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using System.Security.Cryptography;
+using DataAccess.Abstract;
+using DataAccess.Concrete;
+using Entities.ViewModels.ConfigurationModels;
+using Entities.ViewModels.TokenModels;
 
 namespace Business.Concrete
 {
     public class TokenManager : ITokenServices
     {
-        private readonly Entities.DTOs.JWT _jwt;
+        private readonly JWT _jwt;
         private readonly SymmetricSecurityKey _key;
         private readonly UserManager<User> _userManager;
+        private ITokenRepository _tokenRepository;
         public TokenManager(IOptions<JWT> jwt, UserManager<User> userManager) 
         {
             _jwt = jwt.Value;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
             _userManager = userManager;
+            _tokenRepository = new TokenRepository();
         }
         public string CreateTokenJWT(User user)
         {
@@ -55,14 +61,12 @@ namespace Business.Concrete
 
             return tokenHandler.WriteToken(token);
         }
-
         public async Task<string> CreateTokenEmailConfirm(User user) 
         { 
             string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             string encodedToken = HttpUtility.UrlEncode(token);
             return encodedToken;
-        }
-        
+        }     
         public async Task<TokenValidation> ValidateToken(HttpContext context)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -101,6 +105,32 @@ namespace Business.Concrete
 
             return new TokenValidation { user = claimUser, Role = userRole.ToList() };
         }
-
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[32]; // 32 byte uzunluğunda bir byte dizisi
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                rng.GetBytes(randomBytes); // Rastgele byte dizisi oluşturuluyor
+            }
+            return Convert.ToBase64String(randomBytes); // Base64 formatında döndürülür
+        }
+        public async Task SaveRefreshTokenAsync(User user, string refreshToken)
+        {
+            var result = await _userManager.SetAuthenticationTokenAsync(user, "MyProvider", "RefreshToken", refreshToken);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Refresh token save failed.");
+            }
+        }
+        public async Task<User> GetUserFromRefreshToken(string refreshToken)
+        {
+            var userToken = await _tokenRepository.GetUserTokenByRefreshTokenAsync(refreshToken);
+            if (userToken != null)
+            {
+                var user = await _userManager.FindByIdAsync(userToken.UserId);
+                return user;
+            }
+            throw new Exception("Reflesh token corrupted!!");
+        }
     }
 }

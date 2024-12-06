@@ -2,7 +2,8 @@
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Entities;
-using Entities.DTOs;
+using Entities.ViewModels.ConfigurationModels;
+using Entities.ViewModels.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +22,7 @@ namespace Business.Concrete
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly Entities.DTOs.JWT _jwt;
+        private readonly JWT _jwt;
         private readonly SignInManager<User> _signInManager;
 
         private IUserRepository _userRepository;
@@ -34,7 +35,7 @@ namespace Business.Concrete
             _signInManager = signInManager;
         }
 
-        public async Task<string> RegisterAsync(RegisterModel model)        //response message alamıyoz düzelcek
+        public async Task<string> RegisterAsync(RegisterUserModel model)        //response message alamıyoz düzelcek
         {
             var user = new User
             {
@@ -42,6 +43,8 @@ namespace Business.Concrete
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
+                Gender = model.Gender,
+                PhoneNumber = model.PhoneNumber,
             };
             var identityResult = await _userManager.CreateAsync(user, model.Password);
             if (identityResult.Succeeded)

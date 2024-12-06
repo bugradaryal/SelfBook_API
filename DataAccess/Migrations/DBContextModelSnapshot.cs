@@ -52,10 +52,14 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
+                    b.Property<byte[]>("pdf")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<DateOnly>("release_date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasDefaultValue(new DateOnly(2024, 11, 24));
+                        .HasDefaultValue(new DateOnly(2024, 12, 6));
 
                     b.HasKey("id");
 
@@ -63,29 +67,6 @@ namespace DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Books");
-                });
-
-            modelBuilder.Entity("Entities.Book_Pdf", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int>("book_id")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("pdf")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("book_id")
-                        .IsUnique();
-
-                    b.ToTable("Book_Pdfs");
                 });
 
             modelBuilder.Entity("Entities.Category", b =>
@@ -186,6 +167,12 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(120)");
 
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(15)")
+                        .HasDefaultValue("Undefined");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(120)");
@@ -247,7 +234,7 @@ namespace DataAccess.Migrations
                     b.Property<DateOnly>("add_date")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
-                        .HasDefaultValue(new DateOnly(2024, 11, 24));
+                        .HasDefaultValue(new DateOnly(2024, 12, 6));
 
                     b.Property<int>("book_id")
                         .HasColumnType("int");
@@ -263,8 +250,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("book_id")
-                        .IsUnique();
+                    b.HasIndex("book_id");
 
                     b.HasIndex("user_id");
 
@@ -300,19 +286,19 @@ namespace DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "85a8aea6-c11d-40b5-9e19-84c0750d5209",
+                            Id = "8c1ef97d-ad67-408c-8fb0-404fd632aeb9",
                             Name = "Administrator",
                             NormalizedName = "ADMİNİSTRATOR"
                         },
                         new
                         {
-                            Id = "e760e7b7-f161-4cc1-bf1f-5dff35e53af9",
+                            Id = "26ac2e91-3818-4466-bebc-503c898e7d22",
                             Name = "Moderator",
                             NormalizedName = "MODERATOR"
                         },
                         new
                         {
-                            Id = "70cdefa4-fcec-40ae-ae48-a6ca3e849ec4",
+                            Id = "89b628c0-a356-4f48-8acd-cf70f2511a1c",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -435,22 +421,11 @@ namespace DataAccess.Migrations
                     b.Navigation("b_category");
                 });
 
-            modelBuilder.Entity("Entities.Book_Pdf", b =>
-                {
-                    b.HasOne("Entities.Book", "book")
-                        .WithOne("book_pdf")
-                        .HasForeignKey("Entities.Book_Pdf", "book_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("book");
-                });
-
             modelBuilder.Entity("Entities.UserLibary", b =>
                 {
                     b.HasOne("Entities.Book", "book")
-                        .WithOne("userlibary")
-                        .HasForeignKey("Entities.UserLibary", "book_id")
+                        .WithMany("userlibary")
+                        .HasForeignKey("book_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -518,11 +493,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Entities.Book", b =>
                 {
-                    b.Navigation("book_pdf")
-                        .IsRequired();
-
-                    b.Navigation("userlibary")
-                        .IsRequired();
+                    b.Navigation("userlibary");
                 });
 
             modelBuilder.Entity("Entities.Category", b =>

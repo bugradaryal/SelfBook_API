@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Business.Abstract;
 using Entities;
-using Entities.DTOs;
+using Entities.ViewModels.ConfigurationModels;
 using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -17,7 +17,7 @@ namespace Business.Concrete
 {
     public class EmailManager : IEmailService
     {
-        private readonly Entities.DTOs.EmailSender _emailsender;
+        private readonly EmailSender _emailsender;
         private readonly UserManager<User> _userManager;
         public EmailManager(IOptions<EmailSender> emailSender, UserManager<User> userManager)
         {

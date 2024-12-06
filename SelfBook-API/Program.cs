@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using DataAccess;
-using Entities.DTOs;
 using DataAccess.Abstract;
 using DataAccess.Concrete;
 using Business.Abstract;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+using Entities.ViewModels.ConfigurationModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +101,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<IUserService, UserManager>();
 builder.Services.AddScoped<ITokenServices, TokenManager>();
+builder.Services.AddScoped<IAdminService, AdminManager>();
 
 builder.Services.AddEndpointsApiExplorer();
 

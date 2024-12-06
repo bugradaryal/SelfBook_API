@@ -9,7 +9,6 @@ namespace DataAccess.Abstract
 {
     public interface IUserRepository
     {
-        public List<User> GetAllUsers();
-
+        Task<List<User>> GetAllUser(int page, string orderBy);
     }
 }

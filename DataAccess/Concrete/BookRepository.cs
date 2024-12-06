@@ -18,11 +18,10 @@ namespace DataAccess.Concrete
         {
             using (var _DBContext = new DBContext())
             {
-                var result = _DBContext.Books.Add(book);
+                _DBContext.Books.Add(book);
                 await _DBContext.SaveChangesAsync();
             }
         }
-
         public async Task DeleteBook(int bookId)
         {
             using (var _DBContext = new DBContext())
@@ -39,15 +38,15 @@ namespace DataAccess.Concrete
                 await _DBContext.SaveChangesAsync();
             }
         }
-        public Book GetBook(int bookId)
+        public async Task<Book> GetBook(int bookId)
         {
             using (var _DBContext = new DBContext())
             {
-                var result = _DBContext.Books.FirstOrDefault(x => x.id == bookId);
+                var result = await _DBContext.Books.FirstOrDefaultAsync(x => x.id == bookId);
                 return result;
             }
         }
-        public List<Book> GetAllBook(int page, string orderBy)
+        public async Task<List<Book>> GetAllBook(int page, string orderBy)
         {
             using (var _DBContext = new DBContext())
             {
@@ -58,7 +57,7 @@ namespace DataAccess.Concrete
                 var lambda = Expression.Lambda<Func<Book, object>>(Expression.Convert(property, typeof(object)), parameter);
                 query = query.OrderBy(lambda);
 
-                var result = query.Skip((page - 1) * 5).Take(5).ToList();
+                var result = await query.Skip((page - 1) * 5).Take(5).ToListAsync();
                 return result;
             }
         }

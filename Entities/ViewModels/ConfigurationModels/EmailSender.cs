@@ -5,13 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.DTOs
+namespace Entities.ViewModels.ConfigurationModels
 {
-    public class LoginModel
+    public class EmailSender
     {
-        [Required]
         public string Email { get; set; }
-        [Required]
         public string Password { get; set; }
     }
 }

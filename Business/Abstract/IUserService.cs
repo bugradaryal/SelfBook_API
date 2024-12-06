@@ -1,5 +1,5 @@
 ﻿using Entities;
-using Entities.DTOs;
+using Entities.ViewModels.UserModels;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ namespace Business.Abstract
 {
     public interface IUserService
     {
-        Task<string> RegisterAsync(RegisterModel model);
+        Task<string> RegisterAsync(RegisterUserModel model);
         Task<User> GetUserByEmail(string email);
         Task<SignInResult> LoginAsync(User user, string password);
         Task DeleteUser(string userid, string password);

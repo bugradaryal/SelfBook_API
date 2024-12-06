@@ -5,15 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.DTOs
+namespace Entities.ViewModels.UserLibaryModels
 {
-    public class AddRoleModel
+    public class AddBookLibaryModel
     {
         [Required]
-        public string Email { get; set; }
+        public int book_id { get; set; }
         [Required]
-        public string Password { get; set; }
-        [Required]
-        public string Role { get; set; }
+        public int current_page { get; set; }
+        public DateOnly add_date { get; set; }
     }
 }
