@@ -16,9 +16,9 @@ namespace DataAccess.SeedData
         public void Configure(EntityTypeBuilder<IdentityRole> entity)
         {
             entity.HasData(
-                new IdentityRole { Name = Authorization.Roles.Administrator.ToString(), NormalizedName = Authorization.Roles.Administrator.ToString().ToUpper() },
-                new IdentityRole { Name = Authorization.Roles.Moderator.ToString(), NormalizedName = Authorization.Roles.Moderator.ToString().ToUpper() },
-                new IdentityRole { Name = Authorization.Roles.User.ToString(), NormalizedName = Authorization.Roles.User.ToString().ToUpper() }
+                new IdentityRole { Name = "Administrator", NormalizedName = "Administrator".ToUpper() },
+                new IdentityRole { Name = "Moderator", NormalizedName = "Moderator".ToUpper() },
+                new IdentityRole { Name = "User", NormalizedName = "User".ToUpper() }
             );
         }
     }

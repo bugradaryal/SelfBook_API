@@ -39,7 +39,7 @@ namespace SelfBook.Controllers
 
         [HttpPost("RegisterUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterUser([FromBody] RegisterModel registerModel)   //+++
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterModel registerModel)   
         {
             try
             {
@@ -55,7 +55,7 @@ namespace SelfBook.Controllers
         }
         [HttpPost("LoginUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginUser([FromBody] LoginModel loginModel)        //+++
+        public async Task<IActionResult> LoginUser([FromBody] LoginModel loginModel)        
         {
             try
             {  
@@ -86,7 +86,7 @@ namespace SelfBook.Controllers
         }
         [HttpPost("SendMail")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendingEmail(string email)     //+++
+        public async Task<IActionResult> SendingEmail(string email)     
         {
             try 
             {
@@ -108,7 +108,7 @@ namespace SelfBook.Controllers
         }
         [HttpGet("Emailverification")]
         [AllowAnonymous]
-        public async Task<IActionResult> Emailverification(string userId, string emailConfUrl)  //+++
+        public async Task<IActionResult> Emailverification(string userId, string emailConfUrl)  
         {
             try
             {
@@ -122,11 +122,14 @@ namespace SelfBook.Controllers
         }
         [HttpPost("DeleteUser")]
         [Authorize]
-        public async Task<IActionResult> DeleteUser(string userId, string password) //+++
+        public async Task<IActionResult> DeleteUser(string password) 
         {
             try
             {
-                await _userService.DeleteUser(userId, password);
+                var response = await _tokenServices.ValidateToken(HttpContext);
+                if (response.errorMessage != null)
+                    return BadRequest(new { message = response.errorMessage });
+                await _userService.DeleteUser(response.user.Id, password);
             }
             catch (Exception ex)
             {
@@ -165,10 +168,10 @@ namespace SelfBook.Controllers
                 return BadRequest(ex);
             }
 
-        }   //+++
+        }   
         [HttpPut("ChangePassword")]
         [Authorize]
-        public async Task<IActionResult> ChangePassword(string newPassword, string oldPassword) //+++
+        public async Task<IActionResult> ChangePassword(string newPassword, string oldPassword) 
         {
             try
             {

@@ -33,11 +33,11 @@ namespace Business.Concrete
         }
         public string CreateTokenJWT(User user)
         {
+            var userRole = _userManager.GetRolesAsync(user).Result.First();
             var claims = new []
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id)
+                new Claim(ClaimTypes.Role, userRole),
+                new Claim("uid", user.Id),
             };
             var signingCredentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
 

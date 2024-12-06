@@ -46,7 +46,7 @@ namespace Business.Concrete
             var identityResult = await _userManager.CreateAsync(user, model.Password);
             if (identityResult.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, Authorization.default_role.ToString());
+                await _userManager.AddToRoleAsync(user, "User");
                 return $"User Registered {user.UserName}";
             }
             else
